@@ -1,3 +1,21 @@
+"""
+Llama LLM client implementation.
+
+This module provides a concrete implementation of the BaseLLM interface
+using the Llama API (OpenAI-compatible endpoint). It handles API key
+resolution, request execution, response parsing, and error handling.
+
+Classes:
+- LlamaClient: An LLM client that communicates with Llama models via a
+  compatible OpenAI-style API and returns standardized LLMResponse objects.
+
+Dependencies:
+- Requires a valid Llama API key, provided either directly or via the
+  LLAMA_API_KEY environment variable.
+
+Author: Egor Morozov
+"""
+
 import os
 from openai import OpenAI
 from .base import BaseLLM, LLMResponse

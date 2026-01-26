@@ -1,3 +1,21 @@
+"""
+Gemini LLM client implementation.
+
+This module provides a concrete implementation of the BaseLLM interface
+using Google's Gemini API. It manages API key resolution, request
+configuration, response handling, and error propagation.
+
+Classes:
+- GeminiClient: An LLM client that sends prompts to the Gemini API and
+  returns standardized LLMResponse objects.
+
+Dependencies:
+- Requires a valid Gemini API key, provided either directly or via the
+  GEMINI_API_KEY environment variable.
+
+Author: Egor Morozov
+"""
+
 import os
 from google import genai
 from google.genai import types

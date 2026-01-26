@@ -1,3 +1,21 @@
+"""
+OpenAI GPT client implementation.
+
+This module provides a concrete implementation of the BaseLLM interface
+using OpenAI's Chat Completions API. It handles API key resolution,
+request execution, response parsing, and error handling.
+
+Classes:
+- GPTClient: An LLM client that communicates with OpenAI models and
+  returns standardized LLMResponse objects.
+
+Dependencies:
+- Requires a valid OpenAI API key, provided either directly or via the
+  OPENAI_API_KEY environment variable.
+
+Author: Egor Morozov
+"""
+
 import os
 from openai import OpenAI
 from .base import BaseLLM, LLMResponse

@@ -1,3 +1,21 @@
+"""
+DeepSeek LLM client implementation.
+
+This module provides a concrete implementation of the BaseLLM interface
+using the DeepSeek Chat API. It handles API key resolution, request
+construction, response parsing, and error handling.
+
+Classes:
+- DeepSeekClient: An LLM client that communicates with the DeepSeek API
+  and returns standardized LLMResponse objects.
+
+Dependencies:
+- Requires a valid DeepSeek API key, provided either directly or via the
+  DEEPSEEK_API_KEY environment variable.
+
+Author: Egor Morozov
+"""
+
 import os
 from openai import OpenAI
 from .base import BaseLLM, LLMResponse
