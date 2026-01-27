@@ -17,40 +17,36 @@ Author: Egor Morozov
 """
 
 import os
-from google import genai
-from google.genai import types
+from openai import OpenAI
 from .base import BaseLLM, LLMResponse
 
 class GeminiClient(BaseLLM):
-    def __init__(self, api_key: str = None, model: str = "gemini-2.0-flash-lite"):
+
+    def __init__(self, api_key: str = None, model: str ="gemini-2.0-flash-lite"):
         key = api_key or os.getenv("GEMINI_API_KEY")
         if not key:
             raise ValueError("Gemini API Key is required.")
         super().__init__(key, model)
-
-        self.client = genai.Client(api_key=self.api_key)
-
+        self.client = OpenAI(api_key=self.api_key, base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
+    
     def generate(self, prompt: str, temperature: float = 0) -> LLMResponse:
+
         try:
-            config = types.GenerateContentConfig(
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
                 temperature=temperature
             )
-            
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=config
-            )
 
-            text_content = response.text
-            usage = response.usage_metadata
+            message_content = response.choices[0].message.content
+            usage = response.usage
 
             return LLMResponse(
-                content=text_content,
+                content=message_content,
                 model_name=self.model,
-                input_tokens=usage.prompt_token_count if usage else 0,
-                output_tokens=usage.candidates_token_count if usage else 0,
-                raw_response={"usage": str(usage)}
+                input_tokens=usage.prompt_tokens if usage else 0,
+                output_tokens=usage.completion_tokens if usage else 0,
+                raw_response=response.model_dump()
             )
         except Exception as e:
-            raise RuntimeError(f"Gemini API Error: {e}")
+            raise RuntimeError(f"Llama API Error: {e}")
