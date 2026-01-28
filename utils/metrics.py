@@ -55,3 +55,39 @@ class Efficiency:
 
         """Reset all recorded samples."""
         self.samples = []
+
+class Accuracy:
+
+    def __init__(self):
+        self.correct_count: int = 0
+        self.total_count: int = 0
+
+    def record(self, is_correct: bool):
+
+        self.total_count += 1
+        if is_correct:
+            self.correct_count += 1
+    
+    def record_batch(self, correct: int, total: int):
+        
+        self.correct_count += correct
+        self.total_count += total
+    
+    def get_accuracy(self) -> float:
+        
+        if self.total_count == 0:
+            return 0.0
+        return (self.correct_count / self.total_count) * 100
+    
+    def get_correct_count(self) -> int:
+        
+        return self.correct_count
+    
+    def get_total_count(self) -> int:
+        
+        return self.total_count
+    
+    def reset(self):
+        
+        self.correct_count = 0
+        self.total_count = 0

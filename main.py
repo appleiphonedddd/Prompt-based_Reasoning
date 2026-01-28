@@ -7,7 +7,7 @@ from models.deepseek import DeepSeekClient
 from models.llama import LlamaClient
 from models.gemini import GeminiClient
 from models.qwen import QwenClient
-from utils.metrics import Efficiency
+from utils.metrics import Efficiency, Accuracy
 
 def main():
 
