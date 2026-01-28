@@ -1,17 +1,17 @@
 """
-DeepSeek LLM client implementation.
+Qwen LLM client implementation.
 
 This module provides a concrete implementation of the BaseLLM interface
-using the DeepSeek Chat API. It handles API key resolution, request
-construction, response parsing, and error handling.
+using the Qwen API (OpenAI-compatible endpoint). It handles API key
+resolution, request execution, response parsing, and error handling.
 
 Classes:
-- DeepSeekClient: An LLM client that communicates with the Ollama API
-  and returns standardized LLMResponse objects.
+- QwenClient: An LLM client that communicates with Qwen models via a
+  compatible OpenAI-style API and returns standardized LLMResponse objects.
 
 Dependencies:
-- Requires a valid DeepSeek API key, provided either directly or via the
-  Ollama API environment variable.
+- Requires a valid Qwen API key, provided either directly or via the
+  API_KEY environment variable.
 
 Author: Egor Morozov
 """
@@ -20,9 +20,9 @@ import os
 from openai import OpenAI
 from .base import BaseLLM, LLMResponse
 
-class DeepSeekClient(BaseLLM):
+class QwenClient(BaseLLM):
 
-    def __init__(self, api_key: str = None, model: str ="deepseek-chat"):
+    def __init__(self, api_key: str = None, model: str ="qwen2.5:14b"):
         key = api_key or os.getenv("API_KEY")
         if not key:
             raise ValueError("API Key is required.")

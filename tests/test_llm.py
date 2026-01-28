@@ -7,12 +7,14 @@ from models.deepseek import DeepSeekClient
 from models.gpt import GPTClient
 from models.gemini import GeminiClient
 from models.llama import LlamaClient
-
+from models.qwen import QwenClient
 
 class TestLLMClasses(unittest.TestCase):
 
     def setUp(self):
         self.fake_api_key = "sk-fake-key-123"
+        # Common local URL used in your deepseek/llama/qwen implementations
+        self.local_llm_url = "http://192.168.50.132:11434/v1"
 
     # ---------- Base / Interface tests ----------
 
@@ -44,7 +46,13 @@ class TestLLMClasses(unittest.TestCase):
             init_kwargs = {"api_key": self.fake_api_key}
             if expected_base_url:
                 init_kwargs["base_url"] = expected_base_url
-            MockOpenAI.assert_called_with(**init_kwargs)
+            
+            # We use assert_called with subset checks because some clients might pass extra defaults
+            # but we explicitly check api_key and base_url matches.
+            call_kwargs = MockOpenAI.call_args.kwargs
+            self.assertEqual(call_kwargs.get('api_key'), self.fake_api_key)
+            if expected_base_url:
+                self.assertEqual(call_kwargs.get('base_url'), expected_base_url)
             
             self.assertEqual(client.model, expected_model)
 
@@ -80,10 +88,11 @@ class TestLLMClasses(unittest.TestCase):
             with patch(patch_target) as MockOpenAI:
                 client = client_cls(api_key=None)
                 
-                init_kwargs = {"api_key": test_env_key}
+                # Check call args manually to be robust
+                call_kwargs = MockOpenAI.call_args.kwargs
+                self.assertEqual(call_kwargs.get('api_key'), test_env_key)
                 if expected_base_url:
-                    init_kwargs["base_url"] = expected_base_url
-                MockOpenAI.assert_called_with(**init_kwargs)
+                    self.assertEqual(call_kwargs.get('base_url'), expected_base_url)
                 
                 self.assertEqual(client.api_key, test_env_key)
 
@@ -93,33 +102,15 @@ class TestLLMClasses(unittest.TestCase):
             with self.assertRaises(ValueError):
                 client_cls(api_key=None)
 
-    # ---------- Concrete Implementation Tests (DRY Version) ----------
+    # ---------- Concrete Implementation Tests ----------
 
-    def test_deepseek_full_flow(self):
-        self.assert_openai_style_client(
-            DeepSeekClient,
-            patch_target='models.deepseek.OpenAI',
-            expected_model="deepseek-chat",
-            expected_base_url="https://api.deepseek.com"
-        )
-
-    def test_deepseek_env_fallback(self):
-        self.assert_env_fallback(
-            DeepSeekClient,
-            patch_target='models.deepseek.OpenAI',
-            env_var_name="DEEPSEEK_API_KEY",
-            expected_base_url="https://api.deepseek.com"
-        )
-    
-    def test_deepseek_missing_key(self):
-        self.assert_missing_key_error(DeepSeekClient)
-
+    # 1. GPT Tests
     def test_gpt_full_flow(self):
         self.assert_openai_style_client(
             GPTClient,
             patch_target='models.gpt.OpenAI',
             expected_model="gpt-4o-mini",
-            expected_base_url=None # GPT doesn't set a custom base_url by default
+            expected_base_url=None 
         )
 
     def test_gpt_env_fallback(self):
@@ -133,25 +124,67 @@ class TestLLMClasses(unittest.TestCase):
     def test_gpt_missing_key(self):
         self.assert_missing_key_error(GPTClient)
 
+    # 2. DeepSeek Tests
+    def test_deepseek_full_flow(self):
+        self.assert_openai_style_client(
+            DeepSeekClient,
+            patch_target='models.deepseek.OpenAI',
+            expected_model="deepseek-chat",
+            expected_base_url=self.local_llm_url # Updated to match implementation
+        )
+
+    def test_deepseek_env_fallback(self):
+        self.assert_env_fallback(
+            DeepSeekClient,
+            patch_target='models.deepseek.OpenAI',
+            env_var_name="API_KEY", # Implementation uses generic API_KEY
+            expected_base_url=self.local_llm_url
+        )
+    
+    def test_deepseek_missing_key(self):
+        self.assert_missing_key_error(DeepSeekClient)
+
+    # 3. Llama Tests
     def test_llama_full_flow(self):
         self.assert_openai_style_client(
             LlamaClient,
             patch_target='models.llama.OpenAI',
-            expected_model="Llama-3.3-8B-Instruct",
-            expected_base_url="https://api.llama.com/compat/v1/"
+            expected_model="llama3:8b", # Updated to match implementation default
+            expected_base_url=self.local_llm_url # Updated to match implementation
         )
 
     def test_llama_env_fallback(self):
         self.assert_env_fallback(
             LlamaClient,
             patch_target='models.llama.OpenAI',
-            env_var_name="LLAMA_API_KEY",
-            expected_base_url="https://api.llama.com/compat/v1/"
+            env_var_name="API_KEY", # Implementation uses generic API_KEY
+            expected_base_url=self.local_llm_url
         )
 
     def test_llama_missing_key(self):
         self.assert_missing_key_error(LlamaClient)
 
+    # 4. Qwen Tests (Added these as they were missing)
+    def test_qwen_full_flow(self):
+        self.assert_openai_style_client(
+            QwenClient,
+            patch_target='models.qwen.OpenAI',
+            expected_model="qwen2.5:14b",
+            expected_base_url=self.local_llm_url
+        )
+
+    def test_qwen_env_fallback(self):
+        self.assert_env_fallback(
+            QwenClient,
+            patch_target='models.qwen.OpenAI',
+            env_var_name="API_KEY",
+            expected_base_url=self.local_llm_url
+        )
+
+    def test_qwen_missing_key(self):
+        self.assert_missing_key_error(QwenClient)
+
+    # 5. Gemini Tests
     def test_gemini_full_flow(self):
         self.assert_openai_style_client(
             GeminiClient,
@@ -174,4 +207,3 @@ class TestLLMClasses(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    

@@ -11,7 +11,7 @@ Classes:
 
 Dependencies:
 - Requires a valid Llama API key, provided either directly or via the
-  LLAMA_API_KEY environment variable.
+  API_KEY environment variable.
 
 Author: Egor Morozov
 """
@@ -22,12 +22,12 @@ from .base import BaseLLM, LLMResponse
 
 class LlamaClient(BaseLLM):
 
-    def __init__(self, api_key: str = None, model: str ="Llama-3.3-8B-Instruct"):
-        key = api_key or os.getenv("LLAMA_API_KEY")
+    def __init__(self, api_key: str = None, model: str ="llama3:8b"):
+        key = api_key or os.getenv("API_KEY")
         if not key:
-            raise ValueError("Llama API Key is required.")
+            raise ValueError("API Key is required.")
         super().__init__(key, model)
-        self.client = OpenAI(api_key=self.api_key, base_url="https://api.llama.com/compat/v1/")
+        self.client = OpenAI(api_key=self.api_key, base_url="http://192.168.50.132:11434/v1")
     
     def generate(self, prompt: str, temperature: float = 0) -> LLMResponse:
 

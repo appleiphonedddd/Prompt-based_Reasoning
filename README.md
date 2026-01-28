@@ -32,6 +32,12 @@ conda activate Prompt
 ./setup_ollama_gpu.sh
 ```
 
+3. Setting up Ollama API key
+
+```sh
+export API_KEY="your_api_key"
+```
+
 4. Run evaluation
 
 ```sh
