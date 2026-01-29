@@ -12,12 +12,27 @@ from utils.metrics import Efficiency, Accuracy
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
 
-def run(args):
+MODEL_MAP = {
+    "gpt": GPTClient,
+    "deepseek": DeepSeekClient,
+    "llama": LlamaClient,
+    "gemini": GeminiClient,
+    "qwen": QwenClient
+}
 
-    model_str = args.model
+def run(args):
+    model_family = args.model.split(':')[0].lower()
+    
+    if model_family not in MODEL_MAP:
+        logger.error(f"Model {model_family} not supported.")
+        return
+
+    client = MODEL_MAP[model_family](model_name=args.model)
 
     efficiency = Efficiency()
     accuracy = Accuracy()
+
+    print(f"--- Starting Evaluation: {args.benchmark} with {args.model} ---")
 
     print("All done!")
 
